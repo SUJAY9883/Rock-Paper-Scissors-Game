@@ -234,13 +234,13 @@ void load_css() {
     GdkScreen *screen = gdk_display_get_default_screen(display);
     gtk_style_context_add_provider_for_screen(screen, GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_USER);
     
-    const char *css =
-        ".window { background-color: #d9d9d9; }"
-        "#main_card { background-color: #ffffff; border-radius: 10px; padding: 24px; border: 1px solid #e5e7eb; }"
+        const char *css =
+        ".window { background-color: #aaa9a9ff; }"
+        "#main_card { background-color: #ffffff; border-radius: 10px; padding: 24px; border: 2px solid #d3d3d3; }"
         "#title_label { font-size: 20pt; font-weight: bold; color: #1f2937; margin-bottom: 10px; }"
-        "label { font-size: 11pt; color: #000000; margin-top: 5px; }"
-        "entry { font-size: 11pt; padding: 8px; border: 1px solid #d1d5db; border-radius: 8px; }"
-        "entry:focus { border: 2px solid #3b82f6; padding: 7px; }"
+        "label { font-size: 12pt; color: #000000; margin-top: 5px; }"
+        "entry { font-size: 12pt; padding: 8px; border: 2px solid #d1d5db; border-radius: 10px; }"
+        "entry:focus { border: 2px solid #3b82f6; padding: 8px; }"
         
         /* Buttons */
         "button { font-size: 11pt; font-weight: bold; border-radius: 8px; padding: 10px 16px; color: white; border: none; margin-top: 10px; transition: background-color 0.2s; }"
@@ -250,7 +250,7 @@ void load_css() {
         "button:hover { background-color: #60a5fa; }"
         "button:active { background-color: #2563eb; }"
         
-        /* Force label color inside buttons if needed (added based on previous chat) */
+        /* Force label color inside buttons (Fix for white text) */
         "#start_btn label, #next_btn label, #again_btn label, #rock_btn label, #paper_btn label, #scissors_btn label { color: #ffffff; }"
 
         /* Feedback Colors */
