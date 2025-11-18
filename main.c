@@ -1,13 +1,13 @@
 /*
- * GTK3 Rock-Paper-Scissors Game
+ * GTK3 Rock-Paper-Scissors Game (Joyful Edition)
  *
- * This C program converts the console logic into a GUI.
+ * This C program converts the console logic into a GUI with fun text.
  *
  * --- How to Compile ---
- * gcc -o gtk_rps gtk_rps.c $(pkg-config --cflags --libs gtk+-3.0)
+ * gcc -o gtk_rps_joyful gtk_rps_joyful.c $(pkg-config --cflags --libs gtk+-3.0)
  *
  * --- Run ---
- * ./gtk_rps
+ * ./gtk_rps_joyful
  */
 
 #include <stdio.h>
@@ -38,7 +38,7 @@ typedef struct {
     GtkWidget *name_error_label;
 
     // Game Screen Widgets
-    GtkWidget *round_label;       // "ROUND NUMBER 1"
+    GtkWidget *round_label;       // "Round 1: Fight!"
     GtkWidget *score_label;       // "Name: 0 | Computer: 0"
     GtkWidget *feedback_label;    // "Computer chose..."
     GtkWidget *result_label;      // "YOU WIN! / DRAW"
@@ -61,7 +61,8 @@ void update_score_display(AppData *data) {
 void update_round_display(AppData *data) {
     gchar *text;
     if (data->current_round <= TOTAL_ROUNDS) {
-        text = g_strdup_printf("ROUND %d OF %d", data->current_round, TOTAL_ROUNDS);
+        // Joyful Text: "Round X: Fight!"
+        text = g_strdup_printf("Round %d: Fight!", data->current_round);
     } else {
         text = g_strdup("GAME OVER");
     }
@@ -74,8 +75,8 @@ void start_new_game(AppData *data) {
     data->player_score = 0;
     data->computer_score = 0;
 
-    // Reset UI
-    gtk_label_set_text(GTK_LABEL(data->feedback_label), "Make your move!");
+    // Reset UI - Joyful Text
+    gtk_label_set_text(GTK_LABEL(data->feedback_label), "Choose your weapon wisely...");
     gtk_label_set_text(GTK_LABEL(data->result_label), "");
     
     // Reset Styling
@@ -94,8 +95,8 @@ void start_new_game(AppData *data) {
 }
 
 void start_next_round_ui(AppData *data) {
-    // Clear previous round results
-    gtk_label_set_text(GTK_LABEL(data->feedback_label), "Make your move!");
+    // Clear previous round results - Joyful Text
+    gtk_label_set_text(GTK_LABEL(data->feedback_label), "Choose your weapon wisely...");
     gtk_label_set_text(GTK_LABEL(data->result_label), "");
     
     GtkStyleContext *context = gtk_widget_get_style_context(data->result_label);
@@ -135,21 +136,24 @@ void process_round(AppData *data, int user_choice) {
         data->computer_score++;
     }
 
-    // 4. Update UI Feedback
-    gchar *fb_text = g_strdup_printf("You chose %s.\nComputer chose %s.", user_str, comp_str);
+    // 4. Update UI Feedback - Joyful Text
+    gchar *fb_text = g_strdup_printf("You threw %s! The Computer countered with %s!", user_str, comp_str);
     gtk_label_set_text(GTK_LABEL(data->feedback_label), fb_text);
     g_free(fb_text);
 
     GtkStyleContext *ctx = gtk_widget_get_style_context(data->result_label);
     
     if (result == 0) {
-        gtk_label_set_text(GTK_LABEL(data->result_label), "IT'S A DRAW!");
+        // Joyful Text: Draw
+        gtk_label_set_text(GTK_LABEL(data->result_label), "It's a deadlock! Great minds think alike.");
         gtk_style_context_add_class(ctx, "warning");
     } else if (result == 1) {
-        gtk_label_set_text(GTK_LABEL(data->result_label), "YOU WIN THIS ROUND!");
+        // Joyful Text: Win
+        gtk_label_set_text(GTK_LABEL(data->result_label), "Victory! You crushed this round!");
         gtk_style_context_add_class(ctx, "success");
     } else {
-        gtk_label_set_text(GTK_LABEL(data->result_label), "YOU LOSE THIS ROUND!");
+        // Joyful Text: Loss
+        gtk_label_set_text(GTK_LABEL(data->result_label), "Ouch! The computer got you this time.");
         gtk_style_context_add_class(ctx, "error");
     }
 
@@ -159,9 +163,9 @@ void process_round(AppData *data, int user_choice) {
     gtk_widget_hide(data->choices_box); // Hide input buttons
     
     if (data->current_round < TOTAL_ROUNDS) {
-        // Prep for next round
+        // Prep for next round - Joyful Text
         data->current_round++;
-        gtk_button_set_label(GTK_BUTTON(data->next_round_btn), "Next Round");
+        gtk_button_set_label(GTK_BUTTON(data->next_round_btn), "Ready for the next round?");
         gtk_widget_show(data->next_round_btn);
     } else {
         // Game Over Logic
@@ -170,15 +174,18 @@ void process_round(AppData *data, int user_choice) {
         
         gchar *final_msg;
         if (data->player_score > data->computer_score) {
-            final_msg = g_strdup_printf("CONGRATULATIONS!\nYOU WIN THE GAME!\nFinal Score: %d - %d", 
+            // Joyful Text: Game Win
+            final_msg = g_strdup_printf("CHAMPION!\nYou defeated the machine!\nFinal Score: %d - %d", 
                                         data->player_score, data->computer_score);
             gtk_style_context_add_class(ctx, "success");
         } else if (data->computer_score > data->player_score) {
-            final_msg = g_strdup_printf("GAME OVER!\nCOMPUTER WINS!\nFinal Score: %d - %d", 
+            // Joyful Text: Game Loss
+            final_msg = g_strdup_printf("DEFEAT!\nThe machines have won... for now.\nFinal Score: %d - %d", 
                                         data->player_score, data->computer_score);
             gtk_style_context_add_class(ctx, "error");
         } else {
-            final_msg = g_strdup_printf("GAME OVER!\nIT'S A DRAW!\nFinal Score: %d - %d", 
+            // Joyful Text: Game Draw
+            final_msg = g_strdup_printf("UNBELIEVABLE!\nA perfect tie!\nFinal Score: %d - %d", 
                                         data->player_score, data->computer_score);
             gtk_style_context_add_class(ctx, "warning");
         }
@@ -186,6 +193,8 @@ void process_round(AppData *data, int user_choice) {
         gtk_label_set_text(GTK_LABEL(data->result_label), final_msg);
         g_free(final_msg);
         
+        // Joyful Text: Play Again Button
+        gtk_button_set_label(GTK_BUTTON(data->play_again_btn), "Rematch?");
         gtk_widget_show(data->play_again_btn);
     }
 }
@@ -195,7 +204,8 @@ void process_round(AppData *data, int user_choice) {
 void on_start_clicked(GtkButton *btn, AppData *data) {
     const gchar *name = gtk_entry_get_text(GTK_ENTRY(data->name_entry));
     if (strlen(name) == 0) {
-        gtk_label_set_text(GTK_LABEL(data->name_error_label), "NAME CANNOT BE EMPTY.");
+        // Joyful Text: Name Error
+        gtk_label_set_text(GTK_LABEL(data->name_error_label), "Hold on! Every hero needs a name!");
         gtk_widget_show(data->name_error_label);
     } else {
         g_strlcpy(data->player_name, name, sizeof(data->player_name));
@@ -224,7 +234,6 @@ void load_css() {
     GdkScreen *screen = gdk_display_get_default_screen(display);
     gtk_style_context_add_provider_for_screen(screen, GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_USER);
     
-    // Reusing the exact same CSS style
     const char *css =
         ".window { background-color: #d9d9d9; }"
         "#main_card { background-color: #ffffff; border-radius: 10px; padding: 24px; border: 1px solid #e5e7eb; }"
@@ -241,6 +250,9 @@ void load_css() {
         "button:hover { background-color: #60a5fa; }"
         "button:active { background-color: #2563eb; }"
         
+        /* Force label color inside buttons if needed (added based on previous chat) */
+        "#start_btn label, #next_btn label, #again_btn label, #rock_btn label, #paper_btn label, #scissors_btn label { color: #ffffff; }"
+
         /* Feedback Colors */
         "#result_label { font-size: 14pt; font-weight: bold; padding: 10px; }"
         ".success { color: #16a34a; }"
@@ -255,15 +267,18 @@ void load_css() {
 GtkWidget* create_name_screen(AppData *data) {
     GtkWidget *box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 10);
     
-    GtkWidget *lbl = gtk_label_new("Enter Your Name:");
+    // Joyful Text
+    GtkWidget *lbl = gtk_label_new("Who dares to challenge the computer?");
     gtk_widget_set_halign(lbl, GTK_ALIGN_START);
     gtk_box_pack_start(GTK_BOX(box), lbl, FALSE, FALSE, 0);
 
     data->name_entry = gtk_entry_new();
-    gtk_entry_set_placeholder_text(GTK_ENTRY(data->name_entry), "Player Name...");
+    // Joyful Text: Placeholder
+    gtk_entry_set_placeholder_text(GTK_ENTRY(data->name_entry), "Enter your warrior name...");
     gtk_box_pack_start(GTK_BOX(box), data->name_entry, FALSE, FALSE, 0);
 
-    GtkWidget *btn = gtk_button_new_with_label("Start Game");
+    // Joyful Text: Button
+    GtkWidget *btn = gtk_button_new_with_label("Let's Battle!");
     gtk_widget_set_name(btn, "start_btn");
     g_signal_connect(btn, "clicked", G_CALLBACK(on_start_clicked), data);
     g_signal_connect(data->name_entry, "activate", G_CALLBACK(on_start_clicked), data);
@@ -280,8 +295,8 @@ GtkWidget* create_name_screen(AppData *data) {
 GtkWidget* create_game_screen(AppData *data) {
     GtkWidget *vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 10);
     
-    // Round Header
-    data->round_label = gtk_label_new("ROUND NUMBER 1");
+    // Round Header - Joyful Text
+    data->round_label = gtk_label_new("Round 1: Fight!");
     gtk_widget_set_name(data->round_label, "title_label");
     gtk_box_pack_start(GTK_BOX(vbox), data->round_label, FALSE, FALSE, 0);
 
@@ -289,8 +304,8 @@ GtkWidget* create_game_screen(AppData *data) {
     data->score_label = gtk_label_new("Player: 0 | Computer: 0");
     gtk_box_pack_start(GTK_BOX(vbox), data->score_label, FALSE, FALSE, 0);
 
-    // Feedback Area
-    data->feedback_label = gtk_label_new("Make your move!");
+    // Feedback Area - Joyful Text
+    data->feedback_label = gtk_label_new("Choose your weapon wisely...");
     gtk_box_pack_start(GTK_BOX(vbox), data->feedback_label, FALSE, FALSE, 10);
     
     data->result_label = gtk_label_new("");
@@ -320,13 +335,14 @@ GtkWidget* create_game_screen(AppData *data) {
     gtk_box_pack_start(GTK_BOX(vbox), data->choices_box, FALSE, FALSE, 10);
 
     // --- Next / Play Again Buttons ---
+    // Joyful Text: Labels set dynamically in code, but initial alloc here
     data->next_round_btn = gtk_button_new_with_label("Next Round");
     gtk_widget_set_name(data->next_round_btn, "next_btn");
     gtk_widget_set_no_show_all(data->next_round_btn, TRUE);
     g_signal_connect(data->next_round_btn, "clicked", G_CALLBACK(on_next_round_clicked), data);
     gtk_box_pack_start(GTK_BOX(vbox), data->next_round_btn, FALSE, FALSE, 0);
 
-    data->play_again_btn = gtk_button_new_with_label("Play Again?");
+    data->play_again_btn = gtk_button_new_with_label("Rematch?");
     gtk_widget_set_name(data->play_again_btn, "again_btn");
     gtk_widget_set_no_show_all(data->play_again_btn, TRUE);
     g_signal_connect(data->play_again_btn, "clicked", G_CALLBACK(on_play_again_clicked), data);
@@ -340,7 +356,7 @@ void activate(GtkApplication *app, gpointer user_data) {
     srand(time(0));
 
     GtkWidget *window = gtk_application_window_new(app);
-    gtk_window_set_title(GTK_WINDOW(window), "Rock Paper Scissors");
+    gtk_window_set_title(GTK_WINDOW(window), "Epic Rock Paper Scissors Battle");
     gtk_window_set_default_size(GTK_WINDOW(window), 450, 400);
     gtk_widget_set_name(window, "window");
 
@@ -351,8 +367,8 @@ void activate(GtkApplication *app, gpointer user_data) {
     gtk_widget_set_size_request(card, 400, -1);
     gtk_container_add(GTK_CONTAINER(window), card);
 
-    // Title
-    GtkWidget *title = gtk_label_new("Rock-Paper-Scissors");
+    // Title - Joyful Text
+    GtkWidget *title = gtk_label_new("Rock, Paper, Scissors Battle!");
     gtk_widget_set_name(title, "title_label");
     gtk_box_pack_start(GTK_BOX(card), title, FALSE, FALSE, 10);
 
