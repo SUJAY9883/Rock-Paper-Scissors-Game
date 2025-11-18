@@ -248,15 +248,27 @@ void load_css() {
         "entry { font-size: 11pt; padding: 8px; border: 1px solid #d1d5db; border-radius: 8px; }"
         "entry:focus { border: 2px solid #3b82f6; padding: 7px; }"
         
-        /* Buttons */
-        "button { font-size: 11pt; font-weight: bold; border-radius: 8px; padding: 10px 16px; color: white; border: none; margin-top: 10px; transition: background-color 0.2s; }"
-        "#start_btn, #next_btn, #again_btn { background-color: #3b82f6; }"
-        "#rock_btn, #paper_btn, #scissors_btn { background-color: #3b82f6; margin-right: 5px; margin-left: 5px; }"
+        /* --- Buttons --- */
+        "button {" 
+        "   font-size: 11pt; font-weight: bold; border-radius: 8px; padding: 10px 16px;" 
+        "   color: #ffffff; border: none; margin-top: 10px;" 
+        "   transition: background-color 0.2s;"
+        "   background-image: none;" /* Removes default theme gradient */
+        "}"
         
-        "button:hover { background-color: #60a5fa; }"
-        "button:active { background-color: #2563eb; }"
+        /* Button Backgrounds (Blue #105cd7) */
+        "#start_btn, #next_btn, #again_btn { background-color: #105cd7; }"
+        "#rock_btn, #paper_btn, #scissors_btn { background-color: #105cd7; margin-right: 5px; margin-left: 5px; }"
         
-        /* Force label color inside buttons (Fix for white text) */
+        /* Hover Effects (Light Blue #60a5fa) */
+        /* Specific selectors needed to override ID backgrounds */
+        "#start_btn:hover, #next_btn:hover, #again_btn:hover, #rock_btn:hover, #paper_btn:hover, #scissors_btn:hover {" 
+        "   background-color: #3c77cf;" 
+        "}"
+        
+        "button:active { background-color: #00277c; }"
+        
+        /* Force label color inside all game buttons to White */
         "#start_btn label, #next_btn label, #again_btn label, #rock_btn label, #paper_btn label, #scissors_btn label { color: #ffffff; }"
 
         /* Feedback Colors */
