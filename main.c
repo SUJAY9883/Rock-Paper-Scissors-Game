@@ -413,6 +413,10 @@ GtkWidget* create_result_screen(AppData *data) {
     gtk_widget_set_size_request(card, 350, -1);
     gtk_box_append(GTK_BOX(vbox), card);
 
+    GtkWidget *title_lbl = gtk_label_new("🎮 ROCK PAPER SCISSORS");
+    gtk_widget_add_css_class(title_lbl, "game-title");
+    gtk_box_append(GTK_BOX(card), title_lbl);
+
     data->final_outcome_label = gtk_label_new("");
     gtk_widget_set_halign(data->final_outcome_label, GTK_ALIGN_CENTER);
     gtk_box_append(GTK_BOX(card), data->final_outcome_label);
@@ -425,6 +429,10 @@ GtkWidget* create_result_screen(AppData *data) {
     gtk_widget_set_name(data->play_again_btn, "start_btn");
     g_signal_connect(data->play_again_btn, "clicked", G_CALLBACK(on_play_again_clicked), data);
     gtk_box_append(GTK_BOX(card), data->play_again_btn);
+
+    GtkWidget *credit_lbl = gtk_label_new("Developed by SUJAY PAUL");
+    gtk_widget_add_css_class(credit_lbl, "footer-credit");
+    gtk_box_append(GTK_BOX(card), credit_lbl);
 
     return vbox;
 }
