@@ -1,6 +1,6 @@
 /*
- * Epic Rock Paper Scissors Battle - Redesigned UI
- * * Build:
+ * Epic Rock Paper Scissors Battle - Fixed
+ * Build:
  * gcc main.c -o main.exe $(pkg-config --cflags --libs gtk4)
  */
 
@@ -131,6 +131,7 @@ void start_next_round_ui(AppData *data) {
     gtk_widget_remove_css_class(data->result_label, "warning");
 
     update_round_display(data);
+    update_score_display(data);
 
     gtk_widget_set_visible(data->choices_box, TRUE);
     gtk_widget_set_visible(data->next_round_btn, FALSE);
@@ -209,13 +210,13 @@ void on_scissors_clicked(GtkButton *btn, gpointer user_data) { process_round((Ap
 void on_next_round_clicked(GtkButton *btn, gpointer user_data) { start_next_round_ui((AppData*)user_data); }
 void on_play_again_clicked(GtkButton *btn, gpointer user_data) { start_new_game((AppData*)user_data); }
 
-/* --- CSS Styling (Matches the Screenshot) --- */
+/* --- CSS Styling --- */
 void load_css(void) {
     GtkCssProvider *provider = gtk_css_provider_new();
     GdkDisplay *display = gdk_display_get_default();
 
     const char *css =
-        /* Main background - Grey like the screenshot */
+        /* Main background - Grey */
         ".window-bg { background-color: #cfcfcf; }"
         
         /* The White Card */
@@ -225,7 +226,9 @@ void load_css(void) {
         ".game-title { font-size: 16pt; font-weight: bold; color: #4a00e0; margin-bottom: 5px; }"
         ".welcome-text { font-size: 14pt; font-weight: bold; color: #2979ff; margin-bottom: 20px; }"
         ".input-label { font-size: 11pt; color: #555555; margin-bottom: 5px; }"
-        
+        ".round-header { font-size: 18pt; font-weight: bold; color: #6200ea; margin-bottom: 5px; }"
+        ".score-info { font-size: 10pt; color: #666666; margin-bottom: 15px; }"
+
         /* Entry Field */
         ".styled-entry { background: #ffffff; border: 1px solid #aaa; border-radius: 4px; padding: 10px; color: #000; }"
         ".styled-entry:focus { border: 2px solid #2962ff; }"
@@ -233,14 +236,18 @@ void load_css(void) {
         /* Start Button */
         "#start_btn { background-color: #1a237e; color: white; font-weight: bold; border-radius: 5px; padding: 10px; margin-top: 15px; }"
         "#start_btn:hover { background-color: #283593; }"
+
+        /* Choice Buttons (Rock/Paper/Scissors) */
+        ".choice-btn { background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; padding: 10px; box-shadow: 0 2px 2px rgba(0,0,0,0.05); }"
+        ".choice-btn:hover { background-color: #e9ecef; border-color: #adb5bd; }"
+        ".choice-emoji { font-size: 36px; }"
+        ".choice-label { font-weight: bold; color: #333; font-size: 16px; margin-top: 5px; }"
         
         /* Footer Text */
         ".footer-tip { font-size: 9pt; color: #888888; margin-top: 15px; }"
         ".footer-credit { font-size: 8pt; color: #555555; margin-top: 5px; font-weight: bold; }"
         
         /* Game Screen Elements */
-        "#rock_btn, #paper_btn, #scissors_btn { font-weight: bold; margin: 0 5px; padding: 15px; background-color: #f0f0f0; color: #333; }"
-        "#rock_btn:hover, #paper_btn:hover, #scissors_btn:hover { background-color: #e0e0e0; }"
         ".success { color: #00c853; font-weight: bold; font-size: 14pt; }"
         ".error { color: #d50000; font-weight: bold; font-size: 11pt; }"
         ".warning { color: #ffab00; font-weight: bold; font-size: 14pt; }";
@@ -254,61 +261,75 @@ void load_css(void) {
 
 /* --- UI Construction --- */
 
-/* 1. Login/Name Screen (Redesigned to match Screenshot) */
+/* * THIS IS THE MISSING FUNCTION THAT CAUSED THE ERROR 
+ */
+GtkWidget* create_choice_button(const char *emoji, const char *label_text, GCallback callback, AppData *data) {
+    GtkWidget *btn = gtk_button_new();
+    gtk_widget_add_css_class(btn, "choice-btn");
+    
+    GtkWidget *box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 2);
+    gtk_widget_set_halign(box, GTK_ALIGN_CENTER);
+
+    GtkWidget *lbl_emoji = gtk_label_new(emoji);
+    gtk_widget_add_css_class(lbl_emoji, "choice-emoji");
+    
+    GtkWidget *lbl_text = gtk_label_new(label_text);
+    gtk_widget_add_css_class(lbl_text, "choice-label");
+
+    gtk_box_append(GTK_BOX(box), lbl_emoji);
+    gtk_box_append(GTK_BOX(box), lbl_text);
+
+    gtk_button_set_child(GTK_BUTTON(btn), box);
+    g_signal_connect(btn, "clicked", callback, data);
+
+    return btn;
+}
+
+/* 1. Login/Name Screen */
 GtkWidget* create_name_screen(AppData *data) {
-    /* Main container to center the card */
     GtkWidget *center_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     gtk_widget_set_valign(center_box, GTK_ALIGN_CENTER);
     gtk_widget_set_halign(center_box, GTK_ALIGN_CENTER);
     gtk_widget_set_vexpand(center_box, TRUE);
     gtk_widget_set_hexpand(center_box, TRUE);
 
-    /* The White Card */
     GtkWidget *card = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
     gtk_widget_add_css_class(card, "login-card");
-    gtk_widget_set_size_request(card, 350, -1); /* Set width */
+    gtk_widget_set_size_request(card, 350, -1);
     gtk_box_append(GTK_BOX(center_box), card);
 
-    /* Header: "🎮 GAME TITLE" */
     GtkWidget *title_lbl = gtk_label_new("🎮 ROCK PAPER SCISSORS");
     gtk_widget_add_css_class(title_lbl, "game-title");
     gtk_box_append(GTK_BOX(card), title_lbl);
 
-    /* Sub-header: "Welcome!" */
     GtkWidget *welcome_lbl = gtk_label_new("Welcome!");
     gtk_widget_add_css_class(welcome_lbl, "welcome-text");
     gtk_box_append(GTK_BOX(card), welcome_lbl);
 
-    /* Question Label */
     GtkWidget *q_lbl = gtk_label_new("Who dares to challenge the computer?");
     gtk_widget_add_css_class(q_lbl, "input-label");
-    gtk_widget_set_halign(q_lbl, GTK_ALIGN_START); /* Align text left */
+    gtk_widget_set_halign(q_lbl, GTK_ALIGN_START);
     gtk_box_append(GTK_BOX(card), q_lbl);
 
-    /* Input Entry */
     data->name_entry = gtk_entry_new();
     gtk_entry_set_placeholder_text(GTK_ENTRY(data->name_entry), "Enter your warrior name...");
     gtk_widget_add_css_class(data->name_entry, "styled-entry");
     gtk_box_append(GTK_BOX(card), data->name_entry);
 
-    /* Start Button */
     GtkWidget *btn = gtk_button_new_with_label("Let's Battle!");
     gtk_widget_set_name(btn, "start_btn");
     g_signal_connect(btn, "clicked", G_CALLBACK(on_start_clicked), data);
     g_signal_connect(data->name_entry, "activate", G_CALLBACK(on_start_clicked), data);
     gtk_box_append(GTK_BOX(card), btn);
 
-    /* Error Label */
     data->name_error_label = gtk_label_new("");
     gtk_widget_add_css_class(data->name_error_label, "error");
     gtk_box_append(GTK_BOX(card), data->name_error_label);
 
-    /* Footer Tip */
     GtkWidget *tip_lbl = gtk_label_new("💡 Tip: Hey hero... don't forget to tell me who you are!");
     gtk_widget_add_css_class(tip_lbl, "footer-tip");
     gtk_box_append(GTK_BOX(card), tip_lbl);
 
-    /* Footer Credit */
     GtkWidget *credit_lbl = gtk_label_new("Developed by SUJAY PAUL");
     gtk_widget_add_css_class(credit_lbl, "footer-credit");
     gtk_box_append(GTK_BOX(card), credit_lbl);
@@ -318,56 +339,65 @@ GtkWidget* create_name_screen(AppData *data) {
 
 /* 2. Game Screen */
 GtkWidget* create_game_screen(AppData *data) {
-    GtkWidget *vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 15);
-    gtk_widget_set_valign(vbox, GTK_ALIGN_CENTER);
-    gtk_widget_set_halign(vbox, GTK_ALIGN_CENTER);
-    gtk_widget_set_vexpand(vbox, TRUE);
-    gtk_widget_set_hexpand(vbox, TRUE);
+    GtkWidget *center_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    gtk_widget_set_valign(center_box, GTK_ALIGN_CENTER);
+    gtk_widget_set_halign(center_box, GTK_ALIGN_CENTER);
+    gtk_widget_set_vexpand(center_box, TRUE);
+    gtk_widget_set_hexpand(center_box, TRUE);
 
-    data->round_label = gtk_label_new("Round 1");
-    gtk_widget_add_css_class(data->round_label, "game-title");
-    gtk_box_append(GTK_BOX(vbox), data->round_label);
+    GtkWidget *card = gtk_box_new(GTK_ORIENTATION_VERTICAL, 10);
+    gtk_widget_add_css_class(card, "login-card"); 
+    gtk_widget_set_size_request(card, 380, -1);
+    gtk_box_append(GTK_BOX(center_box), card);
 
-    data->score_label = gtk_label_new("0 - 0");
-    gtk_box_append(GTK_BOX(vbox), data->score_label);
+    GtkWidget *title_lbl = gtk_label_new("🎮 ROCK PAPER SCISSORS");
+    gtk_widget_add_css_class(title_lbl, "game-title");
+    gtk_box_append(GTK_BOX(card), title_lbl);
 
-    data->feedback_label = gtk_label_new("...");
-    gtk_box_append(GTK_BOX(vbox), data->feedback_label);
+    data->round_label = gtk_label_new("Round 1: Fight!");
+    gtk_widget_add_css_class(data->round_label, "round-header");
+    gtk_box_append(GTK_BOX(card), data->round_label);
+
+    data->score_label = gtk_label_new("Player: 0 | Computer: 0");
+    gtk_widget_add_css_class(data->score_label, "score-info");
+    gtk_box_append(GTK_BOX(card), data->score_label);
+
+    data->feedback_label = gtk_label_new("Make your move...");
+    gtk_widget_set_margin_bottom(data->feedback_label, 15);
+    gtk_box_append(GTK_BOX(card), data->feedback_label);
+
+    data->choices_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 15);
+    gtk_widget_set_halign(data->choices_box, GTK_ALIGN_CENTER);
+    gtk_widget_set_margin_bottom(data->choices_box, 10);
+
+    /* Custom Buttons - USING EMOJIS */
+    GtkWidget *btn_rock = create_choice_button("✊", "Rock", G_CALLBACK(on_rock_clicked), data);
+    GtkWidget *btn_paper = create_choice_button("✋", "Paper", G_CALLBACK(on_paper_clicked), data);
+    GtkWidget *btn_scissors = create_choice_button("✌️", "Scissors", G_CALLBACK(on_scissors_clicked), data);
+    
+    gtk_widget_set_size_request(btn_rock, 80, 80);
+    gtk_widget_set_size_request(btn_paper, 80, 80);
+    gtk_widget_set_size_request(btn_scissors, 80, 80);
+
+    gtk_box_append(GTK_BOX(data->choices_box), btn_rock);
+    gtk_box_append(GTK_BOX(data->choices_box), btn_paper);
+    gtk_box_append(GTK_BOX(data->choices_box), btn_scissors);
+
+    gtk_box_append(GTK_BOX(card), data->choices_box);
 
     data->result_label = gtk_label_new("");
-    gtk_box_append(GTK_BOX(vbox), data->result_label);
-
-    data->choices_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 10);
-    gtk_widget_set_halign(data->choices_box, GTK_ALIGN_CENTER);
-
-    GtkWidget *btn_r = gtk_button_new_with_label("ROCK");
-    GtkWidget *btn_p = gtk_button_new_with_label("PAPER");
-    GtkWidget *btn_s = gtk_button_new_with_label("SCISSORS");
-
-    gtk_widget_set_name(btn_r, "rock_btn");
-    gtk_widget_set_name(btn_p, "paper_btn");
-    gtk_widget_set_name(btn_s, "scissors_btn");
-
-    gtk_widget_set_size_request(btn_r, 100, 50);
-    gtk_widget_set_size_request(btn_p, 100, 50);
-    gtk_widget_set_size_request(btn_s, 100, 50);
-
-    g_signal_connect(btn_r, "clicked", G_CALLBACK(on_rock_clicked), data);
-    g_signal_connect(btn_p, "clicked", G_CALLBACK(on_paper_clicked), data);
-    g_signal_connect(btn_s, "clicked", G_CALLBACK(on_scissors_clicked), data);
-
-    gtk_box_append(GTK_BOX(data->choices_box), btn_r);
-    gtk_box_append(GTK_BOX(data->choices_box), btn_p);
-    gtk_box_append(GTK_BOX(data->choices_box), btn_s);
-
-    gtk_box_append(GTK_BOX(vbox), data->choices_box);
+    gtk_box_append(GTK_BOX(card), data->result_label);
 
     data->next_round_btn = gtk_button_new_with_label("Next");
-    gtk_widget_set_name(data->next_round_btn, "start_btn"); /* Reuse Blue Button Style */
+    gtk_widget_set_name(data->next_round_btn, "start_btn");
     g_signal_connect(data->next_round_btn, "clicked", G_CALLBACK(on_next_round_clicked), data);
-    gtk_box_append(GTK_BOX(vbox), data->next_round_btn);
+    gtk_box_append(GTK_BOX(card), data->next_round_btn);
 
-    return vbox;
+    GtkWidget *credit_lbl = gtk_label_new("Developed by SUJAY PAUL");
+    gtk_widget_add_css_class(credit_lbl, "footer-credit");
+    gtk_box_append(GTK_BOX(card), credit_lbl);
+
+    return center_box;
 }
 
 /* 3. Result Screen */
@@ -378,16 +408,23 @@ GtkWidget* create_result_screen(AppData *data) {
     gtk_widget_set_vexpand(vbox, TRUE);
     gtk_widget_set_hexpand(vbox, TRUE);
 
+    GtkWidget *card = gtk_box_new(GTK_ORIENTATION_VERTICAL, 20);
+    gtk_widget_add_css_class(card, "login-card");
+    gtk_widget_set_size_request(card, 350, -1);
+    gtk_box_append(GTK_BOX(vbox), card);
+
     data->final_outcome_label = gtk_label_new("");
-    gtk_box_append(GTK_BOX(vbox), data->final_outcome_label);
+    gtk_widget_set_halign(data->final_outcome_label, GTK_ALIGN_CENTER);
+    gtk_box_append(GTK_BOX(card), data->final_outcome_label);
 
     data->final_score_label = gtk_label_new("");
-    gtk_box_append(GTK_BOX(vbox), data->final_score_label);
+    gtk_widget_set_halign(data->final_score_label, GTK_ALIGN_CENTER);
+    gtk_box_append(GTK_BOX(card), data->final_score_label);
 
     data->play_again_btn = gtk_button_new_with_label("Play Again");
-    gtk_widget_set_name(data->play_again_btn, "start_btn"); /* Reuse Blue Button Style */
+    gtk_widget_set_name(data->play_again_btn, "start_btn");
     g_signal_connect(data->play_again_btn, "clicked", G_CALLBACK(on_play_again_clicked), data);
-    gtk_box_append(GTK_BOX(vbox), data->play_again_btn);
+    gtk_box_append(GTK_BOX(card), data->play_again_btn);
 
     return vbox;
 }
@@ -398,22 +435,19 @@ void activate(GtkApplication *app, gpointer user_data) {
     srand((unsigned int)time(NULL));
 
     GtkWidget *window = gtk_application_window_new(app);
-    gtk_widget_set_size_request(window, 800, 600); /* Larger size to show the grey background */
+    gtk_widget_set_size_request(window, 800, 600);
     
-    /* Header Bar */
     GtkWidget *header = gtk_header_bar_new();
     gtk_window_set_titlebar(GTK_WINDOW(window), header);
     gtk_window_set_title(GTK_WINDOW(window), "Epic Rock Paper Scissors Battle");
 
-    /* Main Box for Background Color */
     GtkWidget *main_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-    gtk_widget_add_css_class(main_box, "window-bg"); /* This adds the GREY background */
+    gtk_widget_add_css_class(main_box, "window-bg");
     gtk_window_set_child(GTK_WINDOW(window), main_box);
 
     data->stack = gtk_stack_new();
     gtk_stack_set_transition_type(GTK_STACK(data->stack), GTK_STACK_TRANSITION_TYPE_SLIDE_LEFT_RIGHT);
     
-    /* Ensure stack fills the grey area */
     gtk_widget_set_vexpand(data->stack, TRUE);
     gtk_widget_set_hexpand(data->stack, TRUE);
 
