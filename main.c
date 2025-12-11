@@ -1,6 +1,6 @@
 /*
  * ----------------------------------------------------------------------------
- * Project: Number Guessing Game (GTK4)
+ * Project: Rock Paper Scissors (GTK4)
  * Developer: Sujay Paul
  * Date: 10-12-2025
  * Email: sujaypaul892@gmail.com
